@@ -1,11 +1,20 @@
-from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ..models.accounts import User
 from ..serializers.accounts import UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """A simple ViewSet for viewing and editing users"""
+class UserAPIView(APIView):
+    """Allow just authenticated users to get access to url"""
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, format=None):
+        content = {"status": "request was permitted"}
+
+        return Response(content)
+
+    # queryset = User.objects.all()
+    # serializer_class = UserSerializer
