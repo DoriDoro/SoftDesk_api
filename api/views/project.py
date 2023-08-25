@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from ..models.project import Project, Contributor, Issue, Comment
 from ..serializers.project import (
@@ -14,6 +15,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
@@ -21,6 +23,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
     queryset = Contributor.objects.all()
     serializer_class = ContributorSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class IssueViewSet(viewsets.ModelViewSet):
@@ -28,6 +31,7 @@ class IssueViewSet(viewsets.ModelViewSet):
 
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -35,3 +39,4 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
