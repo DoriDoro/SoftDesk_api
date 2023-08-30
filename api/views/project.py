@@ -1,8 +1,8 @@
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
+from ..models.accounts import User
 from ..models.project import Project, Contributor, Issue, Comment
 from ..serializers.project import (
     ProjectSerializer,
@@ -20,44 +20,20 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     # permission_classes = [IsAuthenticated]
 
-    @action(detail=True, url_path="contributors")
-    def get_contributors(self, request, pk=None):
-        contributors = Contributor.objects.filter(project=pk).order_by("role")
-        serializer = ContributorSerializer(contributors, many=True)
-
-        return Response(serializer.data)
-
-    @action(detail=True, url_path="issues")
-    def get_issues(self, request, pk=None):
-        issues = Issue.objects.filter(project=pk)
-        serializer = IssueSerializer(issues, many=True)
-
-        return Response(serializer.data)
-
-    @action(detail=True, url_path="issue/comments")
-    def get_comments_for_issues(self, request, pk=None):
-        comments = Comment.objects.filter(issue__project=pk)
-        serializer = CommentSerializer(comments, many=True)
-
-        return Response(serializer.data)
-
     def perform_create(self, serializer):
         project = serializer.save()
-        user = self.request.user
+        user = get_object_or_404(User, username=self.request.user.username)
 
-        Contributor.objects.create(
-            user=user,
-            project=project,
-            types="P",
-            role="A",
-        )
+        contributor_data = {
+            "user": user.id,
+            "project": project.id,
+            "types": "P",
+            "role": "A",
+        }
 
-    # def list(self, request, *args, **kwargs):
-    # get_user = request.user
-    # queryset = Project.objects.
-
-    # queryset = Project.objects.all()
-    # serializer_class = ProjectSerializer
+        contributor_serializer = ContributorSerializer(data=contributor_data)
+        contributor_serializer.is_valid(raise_exception=True)
+        contributor_serializer.save()
 
 
 class ContributorViewSet(ModelViewSet):
