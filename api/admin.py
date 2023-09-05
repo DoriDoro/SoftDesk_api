@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models.accounts import User
-from .models.project import Project, Contributor, Issue, Comment
+from .models.accounts import User, Contributor
+from .models.project import Project, Issue, Comment
 
 
 admin.site.register(User, UserAdmin)

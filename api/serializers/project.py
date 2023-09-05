@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from ..models.project import Project, Contributor, Issue, Comment
+from ..models.accounts import Contributor
+from ..models.project import Project, Issue, Comment
+
+# short: from ..models import Project, Contributor, Issue, Comment
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -24,16 +27,7 @@ class ContributorSerializer(serializers.ModelSerializer):
 class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
-        # use all fields but organize them different
-        fields = [
-            "name",
-            "description",
-            "state",
-            "tag",
-            "priority",
-            "project",
-        ]
-        # read_only_fields = ("project", "")
+        fields = "__all__"
 
 
 class CommentSerializer(serializers.ModelSerializer):
