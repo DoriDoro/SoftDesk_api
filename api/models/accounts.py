@@ -47,17 +47,15 @@ class Contributor(models.Model):
         "api.Project",
         on_delete=models.CASCADE,
         related_name="project_contributors",
+        blank=True,
         verbose_name=_("project"),
     )
     type = models.CharField(
-        max_length=1, choices=TYPES, verbose_name=_("contributor type")
+        max_length=1, choices=TYPES, blank=True, verbose_name=_("contributor type")
     )
     role = models.CharField(
-        max_length=2, choices=ROLES, verbose_name=_("contributor role")
+        max_length=2, choices=ROLES, blank=True, verbose_name=_("contributor role")
     )
-
-    class Meta:
-        unique_together = ["user", "project"]
 
     def __str__(self):
         return f"{self.user} <{self.role}>"

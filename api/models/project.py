@@ -72,6 +72,7 @@ class Issue(models.Model):
         "api.Contributor",
         on_delete=models.CASCADE,
         related_name="issue_authors",
+        blank=True,
         verbose_name=_("issue author"),
     )
     assigned_to = models.ForeignKey(
@@ -93,6 +94,7 @@ class Issue(models.Model):
         "api.Project",
         on_delete=models.CASCADE,
         related_name="issues",
+        blank=True,
         verbose_name=_("related project"),
     )
 
@@ -111,6 +113,7 @@ class Comment(models.Model):
         "api.Contributor",
         on_delete=models.CASCADE,
         related_name="comment_authors",
+        blank=True,
         verbose_name=_("comment author"),
     )
     name = models.CharField(max_length=100, verbose_name=_("comment name"))
@@ -119,6 +122,7 @@ class Comment(models.Model):
         "api.Issue",
         on_delete=models.CASCADE,
         related_name="comments",
+        blank=True,
         verbose_name=_("related issue"),
     )
 
