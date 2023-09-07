@@ -36,6 +36,7 @@ class ProjectViewSet(ModelViewSet):
 
 class ContributorViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing contributors
+    - The queryset is based on the project
     - A Contributor with role=author can create new Contributors with
         role=contributor and type=project
     - Display all Contributors related to the project mentioned in the url"""
@@ -45,11 +46,11 @@ class ContributorViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         project = get_object_or_404(Project, id=self.kwargs["project_pk"])
-        project_user = project.project_contributors.filter(
-            user=self.request.user
+        project_user = Contributor.objects.filter(
+            user=serializer.initial_data["user"]
         ).exists()
 
-        if project_user:
+        if not project_user:
             serializer.save(project=project, type="P", role="CO")
 
     def get_queryset(self):
@@ -58,32 +59,55 @@ class ContributorViewSet(ModelViewSet):
 
 class IssueViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing issues
+    - The queryset is based on the project
     - A Contributor with role=author can create new Contributors with
         role=contributor and type=issue
         and assign this contributor."""
 
-    queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     # permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         user = get_object_or_404(User, username=self.request.user.username)
         project = get_object_or_404(Project, id=self.kwargs["project_pk"])
-        project_user = project.project_contributors.filter(
-            user=self.request.user
-        ).exists()
 
-        if project_user:
-            contributor = Contributor(
-                user=user,
-                project=project,
-                type="I",
-                role="CO",
-            )
-            contributor.save()
+        # check if the author assigned himself the issue:
+        author_assign = Contributor.objects.filter(
+            user=serializer.initial_data["assigned_to"],
+            type="I",
+            role="A",
+        )
+        # check if the contributor already exists:
+        contributor = Contributor.objects.filter(
+            user=serializer.initial_data["assigned_to"],
+            type="I",
+            role="CO",
+        )
 
-            serializer.save(project=project, author=contributor)
+        print("here---", author_assign, "---", contributor)
+
+        # if the request.user assign the issue to himself:
+        if not contributor:
+            if not author_assign:
+                print("well done")
+
+        # if no contributor with role='CO' for project exists
+        if not contributor and not author_assign:
+            print("check")
+            # contributor = Contributor(
+            #     user=user,
+            #     project=project,
+            #     type="I",
+            #     role="CO",
+            # )
+            # contributor.save()
+            #
+            # serializer.save(project=project, author=contributor)
         # TODO: if not author created the contributor: message in Postman: not saved
+        # TODO: if author assign it to itself
+
+    def get_queryset(self):
+        return Issue.objects.filter(project_id=self.kwargs["project_pk"])
 
 
 class CommentViewSet(ModelViewSet):

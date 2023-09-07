@@ -58,4 +58,4 @@ class Contributor(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user} <{self.role}>"
+        return f"{self.user} <{self.type} | {self.role}>"
