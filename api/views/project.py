@@ -71,40 +71,31 @@ class IssueViewSet(ModelViewSet):
         user = get_object_or_404(User, username=self.request.user.username)
         project = get_object_or_404(Project, id=self.kwargs["project_pk"])
 
-        # check if the author assigned himself the issue:
-        author_assign = Contributor.objects.filter(
-            user=serializer.initial_data["assigned_to"],
-            type="I",
-            role="A",
-        )
-        # check if the contributor already exists:
-        contributor = Contributor.objects.filter(
-            user=serializer.initial_data["assigned_to"],
+        # check if the contributor with role="CO" already exists:
+        assigned_to_exists = Contributor.objects.filter(
+            user_id=serializer.validated_data["assigned_to"].id,
             type="I",
             role="CO",
-        )
+        ).exists()
 
-        print("here---", author_assign, "---", contributor)
+        if not assigned_to_exists:
+            author = Contributor(
+                user=user,
+                project=project,
+                type="I",
+                role="A",
+            )
+            author.save()
 
-        # if the request.user assign the issue to himself:
-        if not contributor:
-            if not author_assign:
-                print("well done")
+            contributor = Contributor(
+                user_id=serializer.validated_data["assigned_to"].id,
+                project=project,
+                type="I",
+                role="CO",
+            )
+            contributor.save()
 
-        # if no contributor with role='CO' for project exists
-        if not contributor and not author_assign:
-            print("check")
-            # contributor = Contributor(
-            #     user=user,
-            #     project=project,
-            #     type="I",
-            #     role="CO",
-            # )
-            # contributor.save()
-            #
-            # serializer.save(project=project, author=contributor)
-        # TODO: if not author created the contributor: message in Postman: not saved
-        # TODO: if author assign it to itself
+            serializer.save(project=project, author=author, assigned_to=contributor)
 
     def get_queryset(self):
         return Issue.objects.filter(project_id=self.kwargs["project_pk"])

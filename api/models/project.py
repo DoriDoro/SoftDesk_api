@@ -79,8 +79,6 @@ class Issue(models.Model):
         "api.Contributor",
         on_delete=models.CASCADE,
         related_name="issue_contributors",
-        null=True,
-        blank=True,
         verbose_name=_("issue assigned to"),
     )
     name = models.CharField(max_length=100, verbose_name=_("name of issue"))
