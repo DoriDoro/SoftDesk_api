@@ -125,6 +125,7 @@ class Comment(models.Model):
         blank=True,
         verbose_name=_("related issue"),
     )
+    issue_url = models.URLField(blank=True, verbose_name=_("url verse an issue"))
 
     def __str__(self):
         return f"{self.name} | {self.issue}"

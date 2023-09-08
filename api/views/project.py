@@ -60,9 +60,8 @@ class ContributorViewSet(ModelViewSet):
 class IssueViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing issues
     - The queryset is based on the project
-    - A Contributor with role=author can create new Contributors with
-        role=contributor and type=issue
-        and assign this contributor."""
+    - A Contributor of the project can create a new Issue and assign it himself or to a Contributor
+        will create 2 Contributors, one role="A" and second role="CO"."""
 
     serializer_class = IssueSerializer
     # permission_classes = [IsAuthenticatedOrReadOnly]
@@ -106,25 +105,36 @@ class CommentViewSet(ModelViewSet):
     - A Contributor with role=author can create new Contributors with
         role=contributor and type=comment"""
 
-    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     # permission_classes = [IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
         user = get_object_or_404(User, username=self.request.user.username)
-        project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
-        issue = get_object_or_404(Issue, id=self.kwargs.get("issue_pk"))
-        project_user = project.project_contributors.filter(
-            user=self.request.user
+        project_pk = self.kwargs.get("project_pk")
+        issue_pk = self.kwargs.get("issue_pk")
+        project = get_object_or_404(Project, id=project_pk)
+        issue = get_object_or_404(Issue, id=issue_pk)
+        issue_url = (
+            f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
+        )
+
+        # check if the contributor with role="CO" already exists:
+        author_exists = Contributor.objects.filter(
+            user=self.request.user,
+            type="C",
+            role="A",
         ).exists()
 
-        if project_user:
+        if not author_exists:
             contributor = Contributor(
                 user=user,
                 project=project,
                 type="C",
-                role="CO",
+                role="A",
             )
             contributor.save()
 
-            serializer.save(author=contributor, issue=issue)
+            serializer.save(author=contributor, issue=issue, issue_url=issue_url)
+
+    def get_queryset(self):
+        return Comment.objects.filter(issue_id=self.kwargs["issue_pk"])
