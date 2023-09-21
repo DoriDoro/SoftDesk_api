@@ -19,43 +19,27 @@ class User(AbstractUser):
         return self.username
 
 
-class Contributor(models.Model):
-    """Author or Contributor of Project(s), Issue(s) and Comment(s)
-    Contributor(s) related to type
-    """
-
-    # types of contributor
-    PROJECT = "P"
-    ISSUE = "I"
-    COMMENT = "C"
-
-    # roles of contributor
-    AUTHOR = "A"
-    CONTRIBUTOR = "CO"
-
-    TYPES = [(PROJECT, "Project"), (ISSUE, "Issue"), (COMMENT, "Comment")]
-
-    ROLES = [(AUTHOR, "Author"), (CONTRIBUTOR, "Contributor")]
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="contributors",
-        verbose_name=_("user"),
-    )
-    project = models.ForeignKey(
-        "api.Project",
-        on_delete=models.CASCADE,
-        related_name="project_contributors",
-        blank=True,
-        verbose_name=_("project"),
-    )
-    type = models.CharField(
-        max_length=1, choices=TYPES, blank=True, verbose_name=_("contributor type")
-    )
-    role = models.CharField(
-        max_length=2, choices=ROLES, blank=True, verbose_name=_("contributor role")
-    )
-
-    def __str__(self):
-        return f"{self.user} <{self.type} | {self.role}>"
+# class Contributor(models.Model):
+#     """Author or Contributor of Project(s), Issue(s) and Comment(s)
+#     Contributor(s) related to type
+#     """
+#
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.CASCADE,
+#         related_name="contributors",
+#         verbose_name=_("user"),
+#     )
+#     project = models.ForeignKey(
+#         "api.Project",
+#         on_delete=models.CASCADE,
+#         related_name="project_contributors",
+#         blank=True,
+#         verbose_name=_("project"),
+#     )
+#
+#     class Meta:
+#         unique_together = ["user", "project"]
+#
+#     def __str__(self):
+#         return f"{self.user}  | {self.project}"

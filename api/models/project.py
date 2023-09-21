@@ -26,6 +26,19 @@ class Project(models.Model):
     project_type = models.CharField(
         max_length=1, choices=PROJECT_TYPES, verbose_name=_("project type")
     )
+    author = models.ForeignKey(
+        "api.User",
+        on_delete=models.CASCADE,
+        blank=True,
+        related_name="project_author",
+        verbose_name=_("project author"),
+    )
+    contributors = models.ManyToManyField(
+        "api.User",
+        blank=True,
+        related_name="projects",
+        verbose_name=_("project contributors"),
+    )
 
     def __str__(self):
         return f"{self.name}"
@@ -69,14 +82,14 @@ class Issue(models.Model):
 
     created_time = models.DateTimeField(auto_now_add=True, verbose_name=_("created on"))
     author = models.ForeignKey(
-        "api.Contributor",
+        "api.User",
         on_delete=models.CASCADE,
         related_name="issue_authors",
         blank=True,
         verbose_name=_("issue author"),
     )
     assigned_to = models.ForeignKey(
-        "api.Contributor",
+        "api.User",
         on_delete=models.CASCADE,
         related_name="issue_contributors",
         verbose_name=_("issue assigned to"),
@@ -93,8 +106,8 @@ class Issue(models.Model):
     project = models.ForeignKey(
         "api.Project",
         on_delete=models.CASCADE,
-        related_name="issues",
         blank=True,
+        related_name="issues",
         verbose_name=_("related project"),
     )
 
@@ -110,10 +123,10 @@ class Comment(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name=_("created on"))
     author = models.ForeignKey(
-        "api.Contributor",
+        "api.User",
         on_delete=models.CASCADE,
-        related_name="comment_authors",
         blank=True,
+        related_name="comment_authors",
         verbose_name=_("comment author"),
     )
     name = models.CharField(max_length=100, verbose_name=_("comment name"))
@@ -121,8 +134,8 @@ class Comment(models.Model):
     issue = models.ForeignKey(
         "api.Issue",
         on_delete=models.CASCADE,
-        related_name="comments",
         blank=True,
+        related_name="comments",
         verbose_name=_("related issue"),
     )
     issue_url = models.URLField(blank=True, verbose_name=_("url verse an issue"))

@@ -7,7 +7,6 @@ from .views.accounts import (
 )
 from .views.project import (
     ProjectViewSet,
-    ContributorViewSet,
     IssueViewSet,
     CommentViewSet,
 )
@@ -20,9 +19,9 @@ router.register(r"projects", ProjectViewSet, basename="project")
 
 # create url like: api/projects/1/contributors/ or api/projects/1/issues/
 project_router = routers.NestedSimpleRouter(router, r"projects", lookup="project")
-project_router.register(
-    r"contributors", ContributorViewSet, basename="project-contributors"
-)
+# project_router.register(
+#     r"contributors", ContributorViewSet, basename="project-contributors"
+# )
 project_router.register(r"issues", IssueViewSet, basename="project-issues")
 
 # create url like: api/projects/1/issues/1/comments/

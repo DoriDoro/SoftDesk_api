@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
-from ..models.accounts import Contributor
 from ..models.project import Project, Issue, Comment
 
 # short: from ..models import Project, Contributor, Issue, Comment
+
+# TODO: instead of '__all__' (bad practise) choose the fields
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -12,16 +13,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = "__all__"
-
-
-class ContributorSerializer(serializers.ModelSerializer):
-    """Contributor Serializer
-    display the human-readable value instead of the database value"""
-
-    class Meta:
-        model = Contributor
-        fields = "__all__"
+        fields = ["id", "name", "description", "project_type", "author", "contributors"]
 
 
 class IssueSerializer(serializers.ModelSerializer):
