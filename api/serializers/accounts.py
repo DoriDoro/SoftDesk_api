@@ -1,13 +1,14 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-from ..models.accounts import User
+UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     """User Serializer"""
 
     class Meta:
-        model = User
+        model = UserModel
         fields = [
             "id",
             "username",
@@ -20,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        user = User(
+        user = UserModel(
             username=validated_data["username"],
             age=validated_data["age"],
             can_be_contacted=validated_data["can_be_contacted"],
@@ -30,3 +31,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class ContributorSerializer(serializers.ModelSerializer):
+    """User/Contributor Serializer"""
+
+    class Meta:
+        model = UserModel
+        fields = ["id"]

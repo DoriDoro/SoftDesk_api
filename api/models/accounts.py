@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
-from softdesk import settings
-
 
 class User(AbstractUser):
     """create User instance with additional attributes"""
@@ -14,32 +12,14 @@ class User(AbstractUser):
     )
     can_be_contacted = models.BooleanField(verbose_name=_("contact consent"))
     can_data_be_shared = models.BooleanField(verbose_name=_("share consent"))
+    project = models.ForeignKey(
+        "api.Project",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="users",
+        verbose_name=_("project user"),
+    )
 
     def __str__(self):
         return self.username
-
-
-# class Contributor(models.Model):
-#     """Author or Contributor of Project(s), Issue(s) and Comment(s)
-#     Contributor(s) related to type
-#     """
-#
-#     user = models.OneToOneField(
-#         settings.AUTH_USER_MODEL,
-#         on_delete=models.CASCADE,
-#         related_name="contributors",
-#         verbose_name=_("user"),
-#     )
-#     project = models.ForeignKey(
-#         "api.Project",
-#         on_delete=models.CASCADE,
-#         related_name="project_contributors",
-#         blank=True,
-#         verbose_name=_("project"),
-#     )
-#
-#     class Meta:
-#         unique_together = ["user", "project"]
-#
-#     def __str__(self):
-#         return f"{self.user}  | {self.project}"

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
 from ..permissions import IsAuthorPermission, IsProjectContributorPermission
-from ..serializers.accounts import UserSerializer
+from ..serializers.accounts import ContributorSerializer
 from ..serializers.project import (
     ProjectSerializer,
     IssueSerializer,
@@ -25,34 +25,35 @@ class ProjectViewSet(ModelViewSet):
     def perform_create(self, serializer):
         user = UserModel.objects.filter(username=self.request.user.username).first()
 
-        # if len(serializer.initial_data) == 4:
-        #     contributors = UserModel.objects.filter(
-        #         id__in=serializer.initial_data["contributors"]
-        #     )
-
         if user:
             # save the author (request.user)
-            serializer.save(author=user)
+            project = serializer.save(author=user)
+            user.project = project
+            print("here", user.project)
 
 
-# class ContributorViewSet(ModelViewSet):
-#     """A simple ViewSet for viewing and editing contributors/users
-#     - The queryset is based on the project
-#     - Display all contributors/Users related to the project mentioned in the url"""
-#
-#     serializer_class = ContributorSerializer
-#     # permission_classes = [AuthorPermission]
-#
-#     def perform_create(self, serializer):
-#         project_contributors = Project.objects.filter(
-#             contributors=serializer.initial_data["id"]
-#         ).exists()
-#
-#         if not project_contributors:
-#             serializer.save(contributors=serializer.initial_data["id"])
-#
-#     def get_queryset(self):
-#         return Project.objects.filter(id=self.kwargs["project_pk"])
+class ContributorViewSet(ModelViewSet):
+    """A simple ViewSet for viewing and editing contributors/users
+    - The queryset is based on the project
+    - Display all contributors/Users related to the project mentioned in the url"""
+
+    serializer_class = ContributorSerializer
+    # permission_classes = [AuthorPermission]
+
+    def get_queryset(self):
+        author = UserModel.objects.filter(project_author=self.request.user).first()
+        contributors = UserModel.objects.filter(
+            project_contributor=self.request.user
+        ).exists()
+
+    def perform_create(self, serializer):
+        project_contributors = Project.objects.filter(
+            contributors=serializer.validated_data["id"]
+        ).exists()
+
+        if not project_contributors:
+            print("tada")
+            # serializer.save(contributors=serializer.validated_data["id"])
 
 
 class IssueViewSet(ModelViewSet):
