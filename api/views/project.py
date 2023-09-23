@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
-from ..permissions import IsAuthorPermission, IsProjectContributorPermission
+from ..permissions import IsAuthor, IsProjectContributor
 from ..serializers.accounts import ContributorSerializer
 from ..serializers.project import (
     ProjectSerializer,
@@ -23,13 +23,18 @@ class ProjectViewSet(ModelViewSet):
     # permission_classes = [IsAuthenticated, AuthorPermission]
 
     def perform_create(self, serializer):
-        user = UserModel.objects.filter(username=self.request.user.username).first()
+        # name and project_type already exists
+        project_exists = Project.objects.filter(
+            name=serializer.validated_data["name"],
+            project_type=serializer.validated_data["project_type"],
+        ).exists()
 
-        if user:
-            # save the author (request.user)
-            project = serializer.save(author=user)
-            user.project = project
-            print("here", user.project)
+        if not project_exists:
+            user = UserModel.objects.filter(username=self.request.user.username).first()
+
+            if user:
+                # save the author as author and as contributor (request.user)
+                serializer.save(author=user, contributors=[user])
 
 
 class ContributorViewSet(ModelViewSet):
@@ -41,19 +46,13 @@ class ContributorViewSet(ModelViewSet):
     # permission_classes = [AuthorPermission]
 
     def get_queryset(self):
-        author = UserModel.objects.filter(project_author=self.request.user).first()
-        contributors = UserModel.objects.filter(
-            project_contributor=self.request.user
-        ).exists()
+        project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
+        return project.contributors.all()
 
     def perform_create(self, serializer):
-        project_contributors = Project.objects.filter(
-            contributors=serializer.validated_data["id"]
-        ).exists()
-
-        if not project_contributors:
-            print("tada")
-            # serializer.save(contributors=serializer.validated_data["id"])
+        project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
+        contributor = get_object_or_404(UserModel, pk=serializer.initial_data["id"])
+        project.contributors.add(contributor)
 
 
 class IssueViewSet(ModelViewSet):
@@ -66,27 +65,25 @@ class IssueViewSet(ModelViewSet):
     # permission_classes = [AuthorPermission]
 
     def perform_create(self, serializer):
-        user = get_object_or_404(UserModel, username=self.request.user.username)
-        project = get_object_or_404(Project, id=self.kwargs["project_pk"])
+        # check if issue already exists:
+        issue_exists = Issue.objects.filter(
+            name=serializer.validated_data["name"],
+            tag=serializer.validated_data["tag"],
+            state=serializer.validated_data["state"],
+            priority=serializer.validated_data["priority"],
+        ).first()
 
-        # TODO: error  raise self.model.MultipleObjectsReturned(
-        # api.models.accounts.Contributor.MultipleObjectsReturned: get() returned more than one Contributor -- it returned 3!
-        # for else statement
+        if not issue_exists:
+            user = get_object_or_404(UserModel, username=self.request.user.username)
+            contributor = get_object_or_404(
+                UserModel, pk=serializer.validated_data["assigned_to"].pk
+            )
+            project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
 
-        serializer.save(
-            project=project,
-            author=user,
-            assigned_to=Contributor.objects.get(
-                user_id=serializer.validated_data["assigned_to"].id
-            ),
-        )
-
-        # TODO: if assigned_to Contributor does not exist
-        # raise self.model.DoesNotExist(
-        # api.models.accounts.Contributor.DoesNotExist: Contributor matching query does not exist.
+            serializer.save(author=user, assigned_to=contributor, project=project)
 
     def get_queryset(self):
-        return Issue.objects.filter(project_id=self.kwargs["project_pk"])
+        return Issue.objects.filter(project_id=self.kwargs.get("project_pk"))
 
 
 class CommentViewSet(ModelViewSet):
@@ -98,30 +95,21 @@ class CommentViewSet(ModelViewSet):
     # permission_classes = [AuthorPermission]
 
     def perform_create(self, serializer):
-        user = get_object_or_404(UserModel, username=self.request.user.username)
-        project_pk = self.kwargs.get("project_pk")
-        issue_pk = self.kwargs.get("issue_pk")
-        project = get_object_or_404(Project, id=project_pk)
-        issue = get_object_or_404(Issue, id=issue_pk)
-        issue_url = (
-            f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
-        )
+        # check if comment exists:
+        comment_exists = Comment.objects.filter(
+            name=serializer.validated_data["name"]
+        ).first()
 
-        # check if the contributor with role="CO" already exists:
-        author_exists = Contributor.objects.filter(
-            user=self.request.user,
-            role="A",
-        ).exists()
-
-        if not author_exists:
-            contributor = Contributor(
-                user=user,
-                project=project,
-                role="A",
+        if not comment_exists:
+            user = get_object_or_404(UserModel, username=self.request.user.username)
+            project_pk = self.kwargs.get("project_pk")
+            issue_pk = self.kwargs.get("issue_pk")
+            issue = get_object_or_404(Issue, id=issue_pk)
+            issue_url = (
+                f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
             )
-            contributor.save()
 
-            serializer.save(author=contributor, issue=issue, issue_url=issue_url)
+            serializer.save(author=user, issue=issue, issue_url=issue_url)
 
     def get_queryset(self):
-        return Comment.objects.filter(issue_id=self.kwargs["issue_pk"])
+        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk"))

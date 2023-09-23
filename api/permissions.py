@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsAuthorPermission(BasePermission):
+class IsAuthor(BasePermission):
     """Object-level permission to only allow authors to edit and delete it"""
 
     message = "You have to be the author to update or delete."
@@ -13,7 +13,7 @@ class IsAuthorPermission(BasePermission):
         return obj.author == request.user
 
 
-class IsProjectContributorPermission(BasePermission):
+class IsProjectContributor(BasePermission):
     """Permission to have Read Only permission"""
 
     message = "You have a ready only permission."

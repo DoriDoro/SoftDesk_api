@@ -12,14 +12,6 @@ class User(AbstractUser):
     )
     can_be_contacted = models.BooleanField(verbose_name=_("contact consent"))
     can_data_be_shared = models.BooleanField(verbose_name=_("share consent"))
-    project = models.ForeignKey(
-        "api.Project",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="users",
-        verbose_name=_("project user"),
-    )
 
     def __str__(self):
         return self.username
