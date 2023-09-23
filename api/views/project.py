@@ -20,7 +20,7 @@ class ProjectViewSet(ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    # permission_classes = [IsAuthenticated, AuthorPermission]
+    permission_classes = [IsAuthor]
 
     def perform_create(self, serializer):
         # name and project_type already exists
@@ -43,7 +43,7 @@ class ContributorViewSet(ModelViewSet):
     - Display all contributors/Users related to the project mentioned in the url"""
 
     serializer_class = ContributorSerializer
-    # permission_classes = [AuthorPermission]
+    permission_classes = [IsAuthor]
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
@@ -62,7 +62,7 @@ class IssueViewSet(ModelViewSet):
         will create 2 Contributors, one role="A" and second role="CO"."""
 
     serializer_class = IssueSerializer
-    # permission_classes = [AuthorPermission]
+    permission_classes = [IsAuthor]
 
     def perform_create(self, serializer):
         # check if issue already exists:
@@ -92,7 +92,7 @@ class CommentViewSet(ModelViewSet):
     """
 
     serializer_class = CommentSerializer
-    # permission_classes = [AuthorPermission]
+    permission_classes = [IsAuthor]
 
     def perform_create(self, serializer):
         # check if comment exists:
