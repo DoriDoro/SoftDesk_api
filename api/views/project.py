@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
-from ..permissions import IsAuthor, IsProjectContributor
+from ..permissions import IsAuthor
 from ..serializers.accounts import ContributorSerializer
 from ..serializers.project import (
     ProjectSerializer,
@@ -18,9 +18,11 @@ class ProjectViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing projects
     Contributor as role=author is created"""
 
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthor]
+
+    def get_queryset(self):
+        return Project.objects.filter(contributors=self.request.user)
 
     def perform_create(self, serializer):
         # name and project_type already exists

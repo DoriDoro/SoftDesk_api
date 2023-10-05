@@ -13,10 +13,10 @@ class IsAuthor(BasePermission):
         return obj.author == request.user
 
 
-class IsProjectContributor(BasePermission):
-    """Permission to have Read Only permission"""
-
-    message = "You have a ready only permission."
-
-    def has_permission(self, request, view):
-        return request.user.projects.fiter(pk=request.data["project_pk"]).exists()
+# class IsProjectContributor(BasePermission):
+#     """Permission to have Read Only permission"""
+#
+#     message = "You have a ready only permission."
+#
+#     def has_permission(self, request, view):
+#         return request.user.projects.fiter(pk=request.data["project_pk"]).exists()
