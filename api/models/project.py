@@ -36,7 +36,7 @@ class Project(models.Model):
     contributors = models.ManyToManyField(
         "api.User",
         blank=True,
-        related_name="project_contributor",
+        related_name="project_contributors",  # TODO MIGRATE
         verbose_name=_("project contributors"),
     )
 

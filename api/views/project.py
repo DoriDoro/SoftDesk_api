@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
-from ..permissions import IsAuthor
+from ..permissions import IsAuthor, IsProjectAuthor, IsProjectContributor
 from ..serializers.accounts import ContributorSerializer
 from ..serializers.project import (
     ProjectSerializer,
@@ -15,11 +15,10 @@ UserModel = get_user_model()
 
 
 class ProjectViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing projects
-    Contributor as role=author is created"""
+    """A simple ViewSet for viewing and editing projects"""
 
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthor]
+    # permission_classes = [IsAuthor]
 
     def get_queryset(self):
         return Project.objects.filter(contributors=self.request.user)
@@ -32,7 +31,7 @@ class ProjectViewSet(ModelViewSet):
         ).exists()
 
         if not project_exists:
-            user = UserModel.objects.filter(username=self.request.user.username).first()
+            user = get_object_or_404(UserModel, username=self.request.user.username)
 
             if user:
                 # save the author as author and as contributor (request.user)
@@ -45,16 +44,29 @@ class ContributorViewSet(ModelViewSet):
     - Display all contributors/Users related to the project mentioned in the url"""
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthor]
+    permission_classes = [IsProjectAuthor]
+
+    # TODO: give contributors permission to add other contributors
+    # TODO: if contributor has no permission for a project, instead of displaying an empty list,
+    #    display a message: "You have no permission."
+    # TODO: write permission that superuser can not be a contributor
+    #    OR overwrite the save function in Project model
+    # TODO: check if contributor is already in the list, if yes, message: "This contributor..."
+    # TODO: message if contributor is added instead of {}, message: "Added contributor succ..."
+    # TODO: if contributor is adding a contributor, it is working, WRONG
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
         return project.contributors.all()
 
     def perform_create(self, serializer):
+        # check permissions result
+        permission_result = self.check_permissions(self.request)
+        print("here-----", permission_result)
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
-        contributor = get_object_or_404(UserModel, pk=serializer.initial_data["id"])
-        project.contributors.add(contributor)
+
+        contributor = get_object_or_404(UserModel, pk=serializer.initial_data["user"])
+        # project.contributors.add(contributor)
 
 
 class IssueViewSet(ModelViewSet):
@@ -64,7 +76,7 @@ class IssueViewSet(ModelViewSet):
         will create 2 Contributors, one role="A" and second role="CO"."""
 
     serializer_class = IssueSerializer
-    permission_classes = [IsAuthor]
+    permission_classes = [IsProjectAuthor]
 
     def perform_create(self, serializer):
         # check if issue already exists:
@@ -94,7 +106,7 @@ class CommentViewSet(ModelViewSet):
     """
 
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthor]
+    permission_classes = [IsProjectAuthor]
 
     def perform_create(self, serializer):
         # check if comment exists:
