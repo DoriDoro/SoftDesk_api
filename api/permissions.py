@@ -15,14 +15,19 @@ class IsAuthor(BasePermission):
         return obj.author == request.user
 
 
-class IsProjectAuthor(BasePermission):
+class IsProjectAuthorOrContributor(BasePermission):
     """Object-level permission to only allow authors to edit and delete an object"""
 
     message = "You have to be the author to update or delete."
 
     def has_permission(self, request, view):
-        # GET, POST without pk
-        return True
+        # GET and POST
+        project_id = view.kwargs.get("project_pk")
+        project = Project.objects.get(pk=project_id)
+
+        # check if the request.user is a contributor
+        if request.user in project.contributors.all():
+            return True
 
     def has_object_permission(self, request, view, obj):
         # GET, POST, PUT, PATCH, DELETE with pk
@@ -34,18 +39,18 @@ class IsProjectAuthor(BasePermission):
         return project.author == request.user
 
 
-class IsProjectContributor(BasePermission):
-    """Permission to add other contributors when request.user is contributor of project"""
-
-    message = "You are no contributor of this project."
-
-    def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-
-        # TODO after migrations add 's' to project_contributor
-        project_contributor = obj.project_contributor
-        return request.user in project_contributor
+# class IsProjectContributor(BasePermission):
+#     """Permission to add other contributors when request.user is contributor of project"""
+#
+#     message = "You are no contributor of this project."
+#
+#     def has_object_permission(self, request, view, obj):
+#         if request.method in SAFE_METHODS:
+#             return True
+#
+#         # TODO after migrations add 's' to project_contributor
+#         project_contributor = obj.project_contributor
+#         return request.user in project_contributor
 
 
 # class IsProjectContributor(BasePermission):
@@ -54,4 +59,5 @@ class IsProjectContributor(BasePermission):
 #     message = "You have a ready only permission."
 #
 #     def has_permission(self, request, view):
+#         # TODO after migrations add 's' to project_contributor
 #         return request.user.project_contributor.filter(pk=request.data["user"]).exists()

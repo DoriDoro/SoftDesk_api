@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
-from ..permissions import IsAuthor, IsProjectAuthor, IsProjectContributor
+from ..permissions import IsAuthor, IsProjectAuthorOrContributor
 from ..serializers.accounts import ContributorSerializer
 from ..serializers.project import (
     ProjectSerializer,
@@ -46,7 +46,7 @@ class ContributorViewSet(ModelViewSet):
     - Display all contributors/Users related to the project mentioned in the url"""
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsProjectAuthor]
+    permission_classes = [IsProjectAuthorOrContributor]
 
     # TODO: give contributors permission to add other contributors
     # TODO: if contributor has no permission for a project, instead of displaying an empty list,
@@ -96,7 +96,7 @@ class IssueViewSet(ModelViewSet):
         will create 2 Contributors, one role="A" and second role="CO"."""
 
     serializer_class = IssueSerializer
-    permission_classes = [IsProjectAuthor]
+    permission_classes = [IsProjectAuthorOrContributor]
 
     def perform_create(self, serializer):
         # check if issue already exists:
@@ -126,7 +126,7 @@ class CommentViewSet(ModelViewSet):
     """
 
     serializer_class = CommentSerializer
-    permission_classes = [IsProjectAuthor]
+    permission_classes = [IsProjectAuthorOrContributor]
 
     def perform_create(self, serializer):
         # check if comment exists:
