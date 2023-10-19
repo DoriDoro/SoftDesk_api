@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+from api.models import Project
+
 
 class IsAuthor(BasePermission):
     """Object-level permission to only allow authors to edit and delete an object"""
@@ -18,18 +20,18 @@ class IsProjectAuthor(BasePermission):
 
     message = "You have to be the author to update or delete."
 
+    def has_permission(self, request, view):
+        # GET, POST without pk
+        return True
+
     def has_object_permission(self, request, view, obj):
+        # GET, POST, PUT, PATCH, DELETE with pk
         if request.method in SAFE_METHODS:
             return True
 
-        # obj is UserModel -> UserModel.project_author
-        #   where project_author is the related_name to UserModel
-        project_author = obj.project_author
-        return project_author.author == request.user
-
-        # if obj.project_author.author == request.user:
-        #     return True
-        # return False
+        project_id = view.kwargs.get("project_pk")
+        project = Project.objects.get(pk=project_id)
+        return project.author == request.user
 
 
 class IsProjectContributor(BasePermission):
@@ -41,6 +43,7 @@ class IsProjectContributor(BasePermission):
         if request.method in SAFE_METHODS:
             return True
 
+        # TODO after migrations add 's' to project_contributor
         project_contributor = obj.project_contributor
         return request.user in project_contributor
 

@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
 
@@ -54,19 +56,37 @@ class ContributorViewSet(ModelViewSet):
     # TODO: check if contributor is already in the list, if yes, message: "This contributor..."
     # TODO: message if contributor is added instead of {}, message: "Added contributor succ..."
     # TODO: if contributor is adding a contributor, it is working, WRONG
+    # TODO: if DELETE do not delete the User, but the relation contributor
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
         return project.contributors.all()
 
     def perform_create(self, serializer):
-        # check permissions result
-        permission_result = self.check_permissions(self.request)
-        print("here-----", permission_result)
-        project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
+        """to create an object"""
 
-        contributor = get_object_or_404(UserModel, pk=serializer.initial_data["user"])
-        # project.contributors.add(contributor)
+        project_id = self.kwargs.get("project_pk")
+        project = get_object_or_404(Project, pk=project_id)
+
+        contributor_id = serializer.initial_data["user"]
+        contributor = get_object_or_404(UserModel, pk=contributor_id)
+        project.contributors.add(contributor)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_destroy(self, instance):
+        """to delete an object, for DELETE"""
+
+        # get the project to remove the contributor
+        project_id = self.kwargs.get("project_pk")
+        project = get_object_or_404(Project, pk=project_id)
+
+        contributor_id = self.request.data.get("user")
+        contributor = get_object_or_404(UserModel, pk=contributor_id)
+
+        project.contributors.remove(contributor)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class IssueViewSet(ModelViewSet):
