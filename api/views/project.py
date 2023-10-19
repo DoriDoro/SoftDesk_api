@@ -20,7 +20,7 @@ class ProjectViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing projects"""
 
     serializer_class = ProjectSerializer
-    # permission_classes = [IsAuthor]
+    permission_classes = [IsAuthor]
 
     def get_queryset(self):
         return Project.objects.filter(contributors=self.request.user)
