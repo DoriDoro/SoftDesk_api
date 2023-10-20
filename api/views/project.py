@@ -48,15 +48,7 @@ class ContributorViewSet(ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsProjectAuthorOrContributor]
 
-    # TODO: give contributors permission to add other contributors
-    # TODO: if contributor has no permission for a project, instead of displaying an empty list,
-    #    display a message: "You have no permission."
-    # TODO: write permission that superuser can not be a contributor
-    #    OR overwrite the save function in Project model
-    # TODO: check if contributor is already in the list, if yes, message: "This contributor..."
-    # TODO: message if contributor is added instead of {}, message: "Added contributor succ..."
-    # TODO: if contributor is adding a contributor, it is working, WRONG
-    # TODO: if DELETE do not delete the User, but the relation contributor
+    # TODO: Green Code, for list and detail etc use different serializer_class
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
@@ -66,37 +58,67 @@ class ContributorViewSet(ModelViewSet):
         """to create an object"""
 
         project_id = self.kwargs.get("project_pk")
-        project = get_object_or_404(Project, pk=project_id)
-
         contributor_id = serializer.initial_data["user"]
+
+        # get the project and all contributors, just one database query
+        project = (
+            Project.objects.filter(pk=project_id)
+            .prefetch_related("contributors")
+            .first()
+        )
         contributor = get_object_or_404(UserModel, pk=contributor_id)
+
+        if contributor.is_superuser:
+            data = {
+                "code": "CONTRIBUTOR_IS_SUPERUSER",
+                "detail": "This contributor can not be added.",
+            }
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+
+        if project.contributors.filter(pk=contributor_id).exists():
+            data = {
+                "code": "CONTRIBUTOR_ALREADY_EXISTS",
+                "detail": "This contributor is already part of the project.",
+            }
+            return Response(data, status.HTTP_400_BAD_REQUEST)
+
         project.contributors.add(contributor)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        data = {
+            "code": "ADDED_CONTRIBUTOR_SUCCESSFULLY",
+            "detail": "Added the contributor successfully.",
+        }
+
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
         """to delete an object, for DELETE"""
 
         # get the project to remove the contributor
         project_id = self.kwargs.get("project_pk")
-        project = get_object_or_404(Project, pk=project_id)
+        if project_id is not None:
+            # to avoid unnecessary database query, to improve performance
+            project = get_object_or_404(Project, pk=project_id)
 
-        contributor_id = self.request.data.get("user")
-        contributor = get_object_or_404(UserModel, pk=contributor_id)
+            contributor_id = self.request.data.get("user")
+            contributor = get_object_or_404(UserModel, pk=contributor_id)
 
-        project.contributors.remove(contributor)
+            project.contributors.remove(contributor)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class IssueViewSet(ModelViewSet):
     """A simple ViewSet for viewing and editing issues
     - The queryset is based on the project
     - A Contributor of the project can create a new Issue and assign it himself or to a Contributor
-        will create 2 Contributors, one role="A" and second role="CO"."""
+    """
 
     serializer_class = IssueSerializer
     permission_classes = [IsProjectAuthorOrContributor]
+
+    def get_queryset(self):
+        return Issue.objects.filter(project_id=self.kwargs.get("project_pk"))
 
     def perform_create(self, serializer):
         # check if issue already exists:
@@ -116,17 +138,15 @@ class IssueViewSet(ModelViewSet):
 
             serializer.save(author=user, assigned_to=contributor, project=project)
 
-    def get_queryset(self):
-        return Issue.objects.filter(project_id=self.kwargs.get("project_pk"))
-
 
 class CommentViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing comments
-    - A Contributor with role=author can create new Contributors with role=contributor
-    """
+    """A simple ViewSet for viewing and editing comments"""
 
     serializer_class = CommentSerializer
     permission_classes = [IsProjectAuthorOrContributor]
+
+    def get_queryset(self):
+        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk"))
 
     def perform_create(self, serializer):
         # check if comment exists:
@@ -144,6 +164,3 @@ class CommentViewSet(ModelViewSet):
             )
 
             serializer.save(author=user, issue=issue, issue_url=issue_url)
-
-    def get_queryset(self):
-        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk"))
