@@ -2,27 +2,60 @@ from rest_framework import serializers
 
 from ..models.project import Project, Issue, Comment
 
-# short: from ..models import Project, Contributor, Issue, Comment
-
-# TODO: instead of '__all__' (bad practise) choose the fields
-
 
 class ProjectSerializer(serializers.ModelSerializer):
-    """Project Serializer
-    display the human-readable value instead of the database value"""
+    """
+    display all information about the Project
+    """
 
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "project_type", "author", "contributors"]
+        fields = [
+            "id",
+            "created_time",
+            "name",
+            "description",
+            "project_type",
+            "author",
+            "contributors",
+        ]
 
 
 class IssueSerializer(serializers.ModelSerializer):
+    """
+    displays all fields of the Issue model
+    """
+
     class Meta:
         model = Issue
-        fields = "__all__"
+        fields = [
+            "id",
+            "created_time",
+            "author",
+            "assigned_to",
+            "name",
+            "description",
+            "tag",
+            "state",
+            "priority",
+            "project",
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """
+    displays the fields of the Comment model
+    """
+
     class Meta:
         model = Comment
-        fields = "__all__"
+        fields = [
+            "id",
+            "uuid",
+            "created_time",
+            "author",
+            "name",
+            "description",
+            "issue",
+            "issue_url",
+        ]

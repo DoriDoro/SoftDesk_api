@@ -5,7 +5,9 @@ UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """User Serializer"""
+    """
+    User Serializer, used to register a new User
+    """
 
     class Meta:
         model = UserModel
@@ -34,7 +36,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ContributorSerializer(serializers.ModelSerializer):
-    """User/Contributor Serializer"""
+    """
+    User/Contributor Serializer
+    - to be able to edit/modify the contributors
+    """
 
     class Meta:
         model = UserModel

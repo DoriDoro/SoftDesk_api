@@ -5,7 +5,9 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-    """create User instance with additional attributes"""
+    """
+    create User instance with additional attributes
+    """
 
     age = models.PositiveSmallIntegerField(
         default=15, validators=[MinValueValidator(15)], verbose_name=_("age")

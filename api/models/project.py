@@ -5,7 +5,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Project(models.Model):
-    """Contributor creates project as author and assign other Contributor(s)"""
+    """
+    User creates project as author and become contributor,
+    can assign other contributor(s) to project
+    """
 
     # project_types for project
     BACKEND = "B"
@@ -41,11 +44,13 @@ class Project(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name} <{self.author}>"
 
 
 class Issue(models.Model):
-    """Issue is related to a project, default is state is ToDo"""
+    """
+    Issue is related to a project, default is state is ToDo
+    """
 
     # tags for issue
     BUG = "B"
@@ -118,7 +123,9 @@ class Issue(models.Model):
 
 
 class Comment(models.Model):
-    """Comment is related to an Issue"""
+    """
+    Comment is related to an Issue
+    """
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name=_("created on"))

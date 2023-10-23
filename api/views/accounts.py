@@ -4,6 +4,8 @@ from ..serializers.accounts import UserSerializer
 
 
 class RegisterView(generics.CreateAPIView):
-    """Register a view"""
+    """
+    Register a User
+    """
 
     serializer_class = UserSerializer

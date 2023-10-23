@@ -17,7 +17,9 @@ UserModel = get_user_model()
 
 
 class ProjectViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing projects"""
+    """
+    A simple ViewSet for viewing and editing projects
+    """
 
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthor]
@@ -39,11 +41,20 @@ class ProjectViewSet(ModelViewSet):
                 # save the author as author and as contributor (request.user)
                 serializer.save(author=user, contributors=[user])
 
+            data = {
+                "code": "CREATED_PROJECT_SUCCESSFULLY",
+                "detail": "The new project is created successfully.",
+            }
+
+            return Response(data, status=status.HTTP_201_CREATED)
+
 
 class ContributorViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing contributors/users
-    - The queryset is based on the project
-    - Display all contributors/Users related to the project mentioned in the url"""
+    """
+    A simple ViewSet for viewing and editing contributors/users
+    - The queryset is based on the contributors of a project
+    - Display all contributors/Users related to the project mentioned in the url
+    """
 
     serializer_class = ContributorSerializer
     permission_classes = [IsProjectAuthorOrContributor]
@@ -55,12 +66,12 @@ class ContributorViewSet(ModelViewSet):
         return project.contributors.all()
 
     def perform_create(self, serializer):
-        """to create an object"""
+        """to add new contributor to project"""
 
         project_id = self.kwargs.get("project_pk")
         contributor_id = serializer.initial_data["user"]
 
-        # get the project and all contributors, just one database query
+        # get the project and all contributors with just one database query
         project = (
             Project.objects.filter(pk=project_id)
             .prefetch_related("contributors")
@@ -92,7 +103,7 @@ class ContributorViewSet(ModelViewSet):
         return Response(data, status=status.HTTP_201_CREATED)
 
     def perform_destroy(self, instance):
-        """to delete an object, for DELETE"""
+        """to delete an contributor, for DELETE"""
 
         # get the project to remove the contributor
         project_id = self.kwargs.get("project_pk")
@@ -109,9 +120,11 @@ class ContributorViewSet(ModelViewSet):
 
 
 class IssueViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing issues
+    """
+    A simple ViewSet for viewing and editing issues
     - The queryset is based on the project
-    - A Contributor of the project can create a new Issue and assign it himself or to a Contributor
+    - A contributor of the project can create a new Issue and assign it to himself
+        or to another contributor
     """
 
     serializer_class = IssueSerializer
@@ -138,9 +151,20 @@ class IssueViewSet(ModelViewSet):
 
             serializer.save(author=user, assigned_to=contributor, project=project)
 
+            data = {
+                "code": "CREATED_ISSUE_SUCCESSFULLY",
+                "detail": "The new issue is created successfully.",
+            }
+
+            return Response(data, status=status.HTTP_201_CREATED)
+
 
 class CommentViewSet(ModelViewSet):
-    """A simple ViewSet for viewing and editing comments"""
+    """
+    A simple ViewSet for viewing and editing comments
+    - The queryset is based on the issue
+    - Creates the issue_url
+    """
 
     serializer_class = CommentSerializer
     permission_classes = [IsProjectAuthorOrContributor]
@@ -164,3 +188,10 @@ class CommentViewSet(ModelViewSet):
             )
 
             serializer.save(author=user, issue=issue, issue_url=issue_url)
+
+            data = {
+                "code": "CREATED_COMMENT_SUCCESSFULLY",
+                "detail": "The new comment is created successfully.",
+            }
+
+            return Response(data, status=status.HTTP_201_CREATED)
