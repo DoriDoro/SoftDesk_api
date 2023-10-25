@@ -6,22 +6,41 @@ from django.contrib.auth import get_user_model
 
 from ..models.project import Project, Issue, Comment
 from ..permissions import IsAuthor, IsProjectAuthorOrContributor
-from ..serializers.accounts import ContributorSerializer
+from ..serializers.accounts import (
+    ContributorListSerializer,
+    ContributorDetailSerializer,
+)
 from ..serializers.project import (
-    ProjectSerializer,
-    IssueSerializer,
-    CommentSerializer,
+    ProjectListSerializer,
+    ProjectDetailSerializer,
+    IssueListSerializer,
+    IssueDetailSerializer,
+    CommentListSerializer,
+    CommentDetailSerializer,
 )
 
 UserModel = get_user_model()
 
 
-class ProjectViewSet(ModelViewSet):
+class SerializerClassMixin:
+    serializer_list_class = None
+    serializer_detail_class = None
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return self.serializer_list_class
+        elif self.action == "retrieve":
+            return self.serializer_detail_class
+        return super().get_serializer_class()
+
+
+class ProjectViewSet(SerializerClassMixin, ModelViewSet):
     """
     A simple ViewSet for viewing and editing projects
     """
 
-    serializer_class = ProjectSerializer
+    serializer_list_class = ProjectListSerializer
+    serializer_detail_class = ProjectDetailSerializer
     permission_classes = [IsAuthor]
 
     def get_queryset(self):
@@ -49,17 +68,16 @@ class ProjectViewSet(ModelViewSet):
             return Response(data, status=status.HTTP_201_CREATED)
 
 
-class ContributorViewSet(ModelViewSet):
+class ContributorViewSet(SerializerClassMixin, ModelViewSet):
     """
     A simple ViewSet for viewing and editing contributors/users
     - The queryset is based on the contributors of a project
     - Display all contributors/Users related to the project mentioned in the url
     """
 
-    serializer_class = ContributorSerializer
+    serializer_list_class = ContributorListSerializer
+    serializer_detail_class = ContributorDetailSerializer
     permission_classes = [IsProjectAuthorOrContributor]
-
-    # TODO: Green Code, for list and detail etc use different serializer_class
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
@@ -119,7 +137,7 @@ class ContributorViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class IssueViewSet(ModelViewSet):
+class IssueViewSet(SerializerClassMixin, ModelViewSet):
     """
     A simple ViewSet for viewing and editing issues
     - The queryset is based on the project
@@ -127,7 +145,8 @@ class IssueViewSet(ModelViewSet):
         or to another contributor
     """
 
-    serializer_class = IssueSerializer
+    serializer_list_class = IssueListSerializer
+    serializer_detail_class = IssueDetailSerializer
     permission_classes = [IsProjectAuthorOrContributor]
 
     def get_queryset(self):
@@ -159,14 +178,15 @@ class IssueViewSet(ModelViewSet):
             return Response(data, status=status.HTTP_201_CREATED)
 
 
-class CommentViewSet(ModelViewSet):
+class CommentViewSet(SerializerClassMixin, ModelViewSet):
     """
     A simple ViewSet for viewing and editing comments
     - The queryset is based on the issue
     - Creates the issue_url
     """
 
-    serializer_class = CommentSerializer
+    serializer_list_class = CommentListSerializer
+    serializer_detail_class = CommentDetailSerializer
     permission_classes = [IsProjectAuthorOrContributor]
 
     def get_queryset(self):

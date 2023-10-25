@@ -3,7 +3,22 @@ from rest_framework import serializers
 from ..models.project import Project, Issue, Comment
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectListSerializer(serializers.ModelSerializer):
+    """
+    display selected information about the Project
+    """
+
+    class Meta:
+        model = Project
+        fields = [
+            "id",
+            "name",
+            "author",
+            "contributors",
+        ]
+
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
     """
     display all information about the Project
     """
@@ -21,7 +36,24 @@ class ProjectSerializer(serializers.ModelSerializer):
         ]
 
 
-class IssueSerializer(serializers.ModelSerializer):
+class IssueListSerializer(serializers.ModelSerializer):
+    """
+    displays selected fields of the Issue model
+    """
+
+    class Meta:
+        model = Issue
+        fields = [
+            "id",
+            "author",
+            "assigned_to",
+            "name",
+            "priority",
+            "project",
+        ]
+
+
+class IssueDetailSerializer(serializers.ModelSerializer):
     """
     displays all fields of the Issue model
     """
@@ -42,7 +74,22 @@ class IssueSerializer(serializers.ModelSerializer):
         ]
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CommentListSerializer(serializers.ModelSerializer):
+    """
+    displays selected fields of the Comment model
+    """
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "author",
+            "name",
+            "issue",
+        ]
+
+
+class CommentDetailSerializer(serializers.ModelSerializer):
     """
     displays the fields of the Comment model
     """

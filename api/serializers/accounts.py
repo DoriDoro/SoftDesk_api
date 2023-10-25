@@ -35,12 +35,29 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class ContributorSerializer(serializers.ModelSerializer):
+class ContributorListSerializer(serializers.ModelSerializer):
     """
     User/Contributor Serializer
-    - to be able to edit/modify the contributors
+    - selected information about the User
     """
 
     class Meta:
         model = UserModel
-        fields = ["id"]
+        fields = ["id", "username"]
+
+
+class ContributorDetailSerializer(serializers.ModelSerializer):
+    """
+    User/Contributor Serializer
+    - all details about the User
+    """
+
+    class Meta:
+        model = UserModel
+        fields = [
+            "id",
+            "username",
+            "age",
+            "can_be_contacted",
+            "can_data_be_shared",
+        ]
