@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from django.contrib.auth import get_user_model
@@ -8,7 +7,7 @@ from django.contrib.auth import get_user_model
 from api.models.project import Project, Issue, Comment
 from api.permissions import IsAuthor, IsProjectAuthorOrContributor
 from api.serializers.accounts import (
-    ContributorListSerializer,
+    ContributorSerializer,
     ContributorDetailSerializer,
 )
 from api.serializers.project import (
@@ -61,26 +60,32 @@ class ProjectViewSet(SerializerClassMixin, ModelViewSet):
         return super().perform_create(serializer)
 
 
-class ContributorViewSet(SerializerClassMixin, ModelViewSet):
+class ContributorViewSet(ModelViewSet):
     """
     A simple ViewSet for creating, viewing and editing contributors/users
     - The queryset is based on the contributors of a project
     - Display all contributors/Users related to the project mentioned in the url
     """
 
-    serializer_class = ContributorListSerializer
-    serializer_detail_class = ContributorDetailSerializer
+    serializer_class = ContributorSerializer
     permission_classes = [IsProjectAuthorOrContributor]
 
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
+
         return project.contributors.all()
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return ContributorDetailSerializer
+
+        return super().get_serializer_class()
 
     def perform_create(self, serializer):
         """to add new contributor to project"""
 
         project_id = self.kwargs.get("project_pk")
-        contributor_id = serializer.initial_data["user"]
+        contributor_id = serializer.initial_data["user_id"]
 
         # get the project and all contributors with just one database query
         project = (
@@ -91,30 +96,15 @@ class ContributorViewSet(SerializerClassMixin, ModelViewSet):
         contributor = get_object_or_404(UserModel, pk=contributor_id)
 
         if contributor.is_superuser:
-            data = {
-                "code": "CONTRIBUTOR_IS_SUPERUSER",
-                "detail": "This contributor can not be added.",
-            }
-            return Response(data, status.HTTP_400_BAD_REQUEST)
+            raise ValidationError("Superusers cannot be added as contributors.")
 
         if project.contributors.filter(pk=contributor_id).exists():
-            data = {
-                "code": "CONTRIBUTOR_ALREADY_EXISTS",
-                "detail": "This contributor is already part of the project.",
-            }
-            return Response(data, status.HTTP_400_BAD_REQUEST)
+            raise ValidationError("This user is already a contributor of this project.")
 
         project.contributors.add(contributor)
 
-        data = {
-            "code": "ADDED_CONTRIBUTOR_SUCCESSFULLY",
-            "detail": "Added the contributor successfully.",
-        }
-
-        return Response(data, status=status.HTTP_201_CREATED)
-
     def perform_destroy(self, instance):
-        """to delete an contributor, for DELETE"""
+        """to remove a contributor from a project, for DELETE"""
 
         # get the project to remove the contributor
         project_id = self.kwargs.get("project_pk")
@@ -122,12 +112,10 @@ class ContributorViewSet(SerializerClassMixin, ModelViewSet):
             # to avoid unnecessary database query, to improve performance
             project = get_object_or_404(Project, pk=project_id)
 
-            contributor_id = self.request.data.get("user")
+            contributor_id = self.request.data.get("user_id")
             contributor = get_object_or_404(UserModel, pk=contributor_id)
 
             project.contributors.remove(contributor)
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class IssueViewSet(SerializerClassMixin, ModelViewSet):

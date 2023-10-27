@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class ContributorListSerializer(serializers.ModelSerializer):
+class ContributorSerializer(serializers.ModelSerializer):
     """
     User/Contributor Serializer
     - selected information about the User
@@ -43,7 +43,7 @@ class ContributorListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ["id", "username"]
+        fields = ["id"]
 
 
 class ContributorDetailSerializer(serializers.ModelSerializer):
