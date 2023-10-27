@@ -1,11 +1,42 @@
 from rest_framework import serializers
 
-from ..models.project import Project, Issue, Comment
+from api.models.project import Project, Issue, Comment
+
+
+class ProjectCreateSerializer(serializers.ModelSerializer):
+    """
+    serializer to create a Project
+        - name, description and project_type are mandatory
+    """
+
+    class Meta:
+        model = Project
+        fields = [
+            "id",
+            "name",
+            "description",
+            "project_type",
+        ]
+
+    # def validate_name(self, value):
+    #     # check if name of the project already exists
+    #     if Project.objects.filter(name=value).exists():
+    #         raise serializers.ValidationError(
+    #             "Attention! This project name exists already."
+    #         )
+    #     return value
+
+    def validate(self, attrs):
+        if Project.objects.filter(
+            name=attrs["name"], project_type=attrs["project_type"]
+        ).exists():
+            raise serializers.ValidationError("Attention! This project exists already.")
+        return attrs
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
     """
-    display selected information about the Project
+    display/lists selected information about the Project
     """
 
     class Meta:
@@ -20,7 +51,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     """
-    display all information about the Project
+    display all information/details about the Project
     """
 
     class Meta:
@@ -35,10 +66,43 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             "contributors",
         ]
 
+    """
+    if the project gets bigger then it can be difficult
+    to implement additional logic or causes errors
+    class ProjectDetailSerializer(ProjectListSerializer):
+
+        class Meta(ProjectListSerializer.Meta):
+            model = Project
+            fields = ProjectListSerializer.Meta.fields + [
+                "created_time",
+                "description",
+                "project_type",
+            ]
+    """
+
+
+class IssueCreateSerializer(serializers.ModelSerializer):
+    """
+    serializer to create an Issue
+        - mandatory fields: name, description, state, tag, priority and assigned_to
+    """
+
+    class Meta:
+        model = Issue
+        fields = [
+            "id",
+            "assigned_to",
+            "name",
+            "description",
+            "tag",
+            "state",
+            "priority",
+        ]
+
 
 class IssueListSerializer(serializers.ModelSerializer):
     """
-    displays selected fields of the Issue model
+    displays/lists selected fields of the Issue model
     """
 
     class Meta:
@@ -48,6 +112,9 @@ class IssueListSerializer(serializers.ModelSerializer):
             "author",
             "assigned_to",
             "name",
+            "description",
+            "tag",
+            "state",
             "priority",
             "project",
         ]
@@ -71,6 +138,21 @@ class IssueDetailSerializer(serializers.ModelSerializer):
             "state",
             "priority",
             "project",
+        ]
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    """
+    serializer to create a Comment
+        - mandatory fields: name and description
+    """
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "name",
+            "description",
         ]
 
 

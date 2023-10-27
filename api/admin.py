@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from .models.project import Project, Issue, Comment
+from api.models.project import Project, Issue, Comment
 
 UserModel = get_user_model()
 

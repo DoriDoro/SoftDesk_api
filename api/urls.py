@@ -2,10 +2,10 @@ from django.urls import path, include
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .views.accounts import (
+from api.views.accounts import (
     RegisterView,
 )
-from .views.project import (
+from api.views.project import (
     ProjectViewSet,
     ContributorViewSet,
     IssueViewSet,
