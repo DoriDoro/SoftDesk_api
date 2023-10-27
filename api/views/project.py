@@ -141,35 +141,20 @@ class IssueViewSet(SerializerClassMixin, ModelViewSet):
     serializer_class = IssueListSerializer
     serializer_create_class = IssueCreateSerializer
     serializer_detail_class = IssueDetailSerializer
-    permission_classes = [IsProjectAuthorOrContributor]
+    permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     def get_queryset(self):
         return Issue.objects.filter(project_id=self.kwargs.get("project_pk"))
 
     def perform_create(self, serializer):
-        # check if issue already exists:
-        issue_exists = Issue.objects.filter(
-            name=serializer.validated_data["name"],
-            tag=serializer.validated_data["tag"],
-            state=serializer.validated_data["state"],
-            priority=serializer.validated_data["priority"],
-        ).first()
+        contributor = get_object_or_404(
+            UserModel, pk=serializer.validated_data["assigned_to"].pk
+        )
+        project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
 
-        if not issue_exists:
-            user = get_object_or_404(UserModel, username=self.request.user.username)
-            contributor = get_object_or_404(
-                UserModel, pk=serializer.validated_data["assigned_to"].pk
-            )
-            project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
-
-            serializer.save(author=user, assigned_to=contributor, project=project)
-
-            data = {
-                "code": "CREATED_ISSUE_SUCCESSFULLY",
-                "detail": "The new issue is created successfully.",
-            }
-
-            return Response(data, status=status.HTTP_201_CREATED)
+        serializer.save(
+            author=self.request.user, assigned_to=contributor, project=project
+        )
 
 
 class CommentViewSet(SerializerClassMixin, ModelViewSet):
@@ -182,31 +167,17 @@ class CommentViewSet(SerializerClassMixin, ModelViewSet):
     serializer_class = CommentListSerializer
     serializer_create_class = CommentCreateSerializer
     serializer_detail_class = CommentDetailSerializer
-    permission_classes = [IsProjectAuthorOrContributor]
+    permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     def get_queryset(self):
         return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk"))
 
     def perform_create(self, serializer):
-        # check if comment exists:
-        comment_exists = Comment.objects.filter(
-            name=serializer.validated_data["name"]
-        ).first()
+        project_pk = self.kwargs.get("project_pk")
+        issue_pk = self.kwargs.get("issue_pk")
+        issue = get_object_or_404(Issue, id=issue_pk)
+        issue_url = (
+            f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
+        )
 
-        if not comment_exists:
-            user = get_object_or_404(UserModel, username=self.request.user.username)
-            project_pk = self.kwargs.get("project_pk")
-            issue_pk = self.kwargs.get("issue_pk")
-            issue = get_object_or_404(Issue, id=issue_pk)
-            issue_url = (
-                f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
-            )
-
-            serializer.save(author=user, issue=issue, issue_url=issue_url)
-
-            data = {
-                "code": "CREATED_COMMENT_SUCCESSFULLY",
-                "detail": "The new comment is created successfully.",
-            }
-
-            return Response(data, status=status.HTTP_201_CREATED)
+        serializer.save(author=self.request.user, issue=issue, issue_url=issue_url)

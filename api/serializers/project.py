@@ -99,6 +99,17 @@ class IssueCreateSerializer(serializers.ModelSerializer):
             "priority",
         ]
 
+    def validate(self, attrs):
+        if Issue.objects.filter(
+            name=attrs["name"],
+            tag=attrs["tag"],
+            state=attrs["state"],
+            priority=attrs["priority"],
+        ).exists():
+            raise serializers.ValidationError("This issue exists already!")
+
+        return attrs
+
 
 class IssueListSerializer(serializers.ModelSerializer):
     """
@@ -154,6 +165,12 @@ class CommentCreateSerializer(serializers.ModelSerializer):
             "name",
             "description",
         ]
+
+    def validate_name(self, value):
+        if Comment.objects.filter(name=value).exists():
+            raise serializers.ValidationError("This comment name exists already.")
+
+        return value
 
 
 class CommentListSerializer(serializers.ModelSerializer):
