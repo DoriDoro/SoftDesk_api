@@ -1,8 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
-from django.contrib.auth import get_user_model
 
 from api.models.project import Project, Issue, Comment
 from api.permissions import IsAuthor, IsProjectAuthorOrContributor
@@ -51,7 +51,10 @@ class ProjectViewSet(SerializerClassMixin, ModelViewSet):
     permission_classes = [IsAuthor, IsAuthenticated]
 
     def get_queryset(self):
-        return Project.objects.filter(contributors=self.request.user)
+        # use order_by to avoid the warning for the pagination
+        return Project.objects.filter(contributors=self.request.user).order_by(
+            "created_time"
+        )
 
     def perform_create(self, serializer):
         # save the author as author and as contributor (request.user)
@@ -73,7 +76,8 @@ class ContributorViewSet(ModelViewSet):
     def get_queryset(self):
         project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
 
-        return project.contributors.all()
+        # use the UserModel attribute to order to avoid the pagination warning
+        return project.contributors.all().order_by("date_joined")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -132,7 +136,9 @@ class IssueViewSet(SerializerClassMixin, ModelViewSet):
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     def get_queryset(self):
-        return Issue.objects.filter(project_id=self.kwargs.get("project_pk"))
+        return Issue.objects.filter(project_id=self.kwargs.get("project_pk")).order_by(
+            "created_time"
+        )
 
     def perform_create(self, serializer):
         contributor = get_object_or_404(
@@ -158,7 +164,9 @@ class CommentViewSet(SerializerClassMixin, ModelViewSet):
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     def get_queryset(self):
-        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk"))
+        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk")).order_by(
+            "created_time"
+        )
 
     def perform_create(self, serializer):
         project_pk = self.kwargs.get("project_pk")
