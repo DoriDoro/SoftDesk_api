@@ -73,11 +73,27 @@ class ContributorViewSet(ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsProjectAuthorOrContributor]
 
-    def get_queryset(self):
-        project = get_object_or_404(Project, pk=self.kwargs.get("project_pk"))
+    _project = None  # create this variable to avoid unnecessary database queries
 
-        # use the UserModel attribute to order to avoid the pagination warning
-        return project.contributors.all().order_by("date_joined")
+    @property
+    def project(self):
+        """create an attribute project inside the ContributorViewSet
+        this attribute is available in the view and can be called/available in the serializer
+        """
+
+        # if the view was never executed before, will make the database query
+        #   otherwise _project will have a value and no database query will be performed
+        if self._project is None:
+            self._project = get_object_or_404(
+                Project.objects.all().prefetch_related("contributors"),
+                pk=self.kwargs["project_pk"],
+            )
+            print("--- project Contr ---", self._project)
+        return self._project
+
+    def get_queryset(self):
+        # use the UserModel attribute 'date_joined' to order to avoid the pagination warning
+        return self.project.contributors.all().order_by("date_joined")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -86,40 +102,10 @@ class ContributorViewSet(ModelViewSet):
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
-        """to add new contributor to project"""
-
-        project_id = self.kwargs.get("project_pk")
-        contributor_id = serializer.initial_data["user_id"]
-
-        # get the project and all contributors with just one database query
-        project = (
-            Project.objects.filter(pk=project_id)
-            .prefetch_related("contributors")
-            .first()
-        )
-        contributor = get_object_or_404(UserModel, pk=contributor_id)
-
-        if contributor.is_superuser:
-            raise ValidationError("Superusers cannot be added as contributors.")
-
-        if project.contributors.filter(pk=contributor_id).exists():
-            raise ValidationError("This user is already a contributor of this project.")
-
-        project.contributors.add(contributor)
+        self.project.contributors.add(serializer.validated_data["user"])
 
     def perform_destroy(self, instance):
-        """to remove a contributor from a project, for DELETE"""
-
-        # get the project to remove the contributor
-        project_id = self.kwargs.get("project_pk")
-        if project_id is not None:
-            # to avoid unnecessary database query, to improve performance
-            project = get_object_or_404(Project, pk=project_id)
-
-            contributor_id = self.request.data.get("user_id")
-            contributor = get_object_or_404(UserModel, pk=contributor_id)
-
-            project.contributors.remove(contributor)
+        self.project.contributors.remove(instance)
 
 
 class IssueViewSet(SerializerClassMixin, ModelViewSet):

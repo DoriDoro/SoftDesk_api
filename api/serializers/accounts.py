@@ -41,9 +41,30 @@ class ContributorSerializer(serializers.ModelSerializer):
     - selected information about the User
     """
 
+    # create attribute 'user', which is write_only because we just need to give a value
+    user = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = UserModel
-        fields = ["id"]
+        fields = ["id", "user"]
+
+    def validate_user(self, value):
+        user = UserModel.objects.filter(pk=value).first()
+
+        if user is None:
+            raise serializers.ValidationError("User does not exists!")
+
+        if user.is_superuser:
+            raise serializers.ValidationError(
+                "Superusers cannot be added as contributors."
+            )
+
+        if self.context["view"].project.contributors.filter(pk=value).exists():
+            raise serializers.ValidationError(
+                "This user is already a contributor of this project."
+            )
+
+        return user
 
 
 class ContributorDetailSerializer(serializers.ModelSerializer):
