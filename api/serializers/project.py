@@ -151,7 +151,7 @@ class CommentCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_name(self, value):
-        if Comment.objects.filter(name=value).exists():
+        if self.context["view"].comment.filter(name=value).exists():
             raise serializers.ValidationError("This comment name exists already.")
 
         return value

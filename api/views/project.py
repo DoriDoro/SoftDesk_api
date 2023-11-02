@@ -139,7 +139,7 @@ class IssueViewSet(SerializerClassMixin, ModelViewSet):
 
     def perform_create(self, serializer):
         contributor = serializer.validated_data["assigned_to"]
-        project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
+        project = get_object_or_404(Project, id=self.kwargs["project_pk"])
 
         serializer.save(
             author=self.request.user,
@@ -160,14 +160,21 @@ class CommentViewSet(SerializerClassMixin, ModelViewSet):
     serializer_detail_class = CommentDetailSerializer
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
+    _comment = None
+
+    @property
+    def comment(self):
+        if self._comment is None:
+            self._comment = Comment.objects.filter(issue_id=self.kwargs["issue_pk"])
+
+        return self._comment
+
     def get_queryset(self):
-        return Comment.objects.filter(issue_id=self.kwargs.get("issue_pk")).order_by(
-            "created_time"
-        )
+        return self.comment.order_by("created_time")
 
     def perform_create(self, serializer):
-        project_pk = self.kwargs.get("project_pk")
-        issue_pk = self.kwargs.get("issue_pk")
+        project_pk = self.kwargs["project_pk"]
+        issue_pk = self.kwargs["issue_pk"]
         issue = get_object_or_404(Issue, id=issue_pk)
         issue_url = (
             f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
