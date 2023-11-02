@@ -50,17 +50,22 @@ class ProjectViewSet(SerializerClassMixin, ModelViewSet):
     serializer_detail_class = ProjectDetailSerializer
     permission_classes = [IsAuthor, IsAuthenticated]
 
+    _project = None
+
+    @property
+    def project(self):
+        if self._project is None:
+            self._project = Project.objects.filter(contributors=self.request.user)
+
+        return self._project
+
     def get_queryset(self):
         # use order_by to avoid the warning for the pagination
-        return Project.objects.filter(contributors=self.request.user).order_by(
-            "created_time"
-        )
+        return self.project.order_by("created_time")
 
     def perform_create(self, serializer):
         # save the author as author and as contributor (request.user)
         serializer.save(author=self.request.user, contributors=[self.request.user])
-
-        return super().perform_create(serializer)
 
 
 class ContributorViewSet(ModelViewSet):

@@ -18,18 +18,12 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
             "project_type",
         ]
 
-    # def validate_name(self, value):
-    #     # check if name of the project already exists
-    #     if Project.objects.filter(name=value).exists():
-    #         raise serializers.ValidationError(
-    #             "Attention! This project name exists already."
-    #         )
-    #     return value
-
     def validate(self, attrs):
-        if Project.objects.filter(
-            name=attrs["name"], project_type=attrs["project_type"]
-        ).exists():
+        if (
+            self.context["view"]
+            .project.filter(name=attrs["name"], project_type=attrs["project_type"])
+            .exists()
+        ):
             raise serializers.ValidationError("Attention! This project exists already.")
         return attrs
 
