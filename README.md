@@ -11,13 +11,13 @@ open terminal:
 4. `pipenv shell` activates the virtual environment
 5. `python manage.py runserver` this command starts the server
 
- # after the installation and starting the server you can:
+ ### after the installation and starting the server you can:
 1. use: http://127.0.0.1:8000/api/ in browser to check the API 
 2. BETTER OPTION: go to [Postman](https://www.postman.com/) and make some tests
 
- # useful ULRs:
-http://127.0.0.1:8000/api/login/
-username: ThePing
+ ### useful ULRs:
+http://127.0.0.1:8000/api/login/ <br>
+username: ThePing <br>
 password: HelloThere55
 
 http://127.0.0.1:8000/api/projects/
