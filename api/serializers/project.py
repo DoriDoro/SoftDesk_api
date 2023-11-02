@@ -60,20 +60,6 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             "contributors",
         ]
 
-    """
-    if the project gets bigger then it can be difficult
-    to implement additional logic or causes errors
-    class ProjectDetailSerializer(ProjectListSerializer):
-
-        class Meta(ProjectListSerializer.Meta):
-            model = Project
-            fields = ProjectListSerializer.Meta.fields + [
-                "created_time",
-                "description",
-                "project_type",
-            ]
-    """
-
 
 class IssueCreateSerializer(serializers.ModelSerializer):
     """
@@ -94,12 +80,16 @@ class IssueCreateSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        if Issue.objects.filter(
-            name=attrs["name"],
-            tag=attrs["tag"],
-            state=attrs["state"],
-            priority=attrs["priority"],
-        ).exists():
+        if (
+            self.context["view"]
+            .issue.filter(
+                name=attrs["name"],
+                tag=attrs["tag"],
+                state=attrs["state"],
+                priority=attrs["priority"],
+            )
+            .exists()
+        ):
             raise serializers.ValidationError("This issue exists already!")
 
         return attrs

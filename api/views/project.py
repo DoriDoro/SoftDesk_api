@@ -93,7 +93,6 @@ class ContributorViewSet(ModelViewSet):
                 Project.objects.all().prefetch_related("contributors"),
                 pk=self.kwargs["project_pk"],
             )
-            print("--- project Contr ---", self._project)
         return self._project
 
     def get_queryset(self):
@@ -126,19 +125,26 @@ class IssueViewSet(SerializerClassMixin, ModelViewSet):
     serializer_detail_class = IssueDetailSerializer
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
+    _issue = None
+
+    @property
+    def issue(self):
+        if self._issue is None:
+            self._issue = Issue.objects.filter(project_id=self.kwargs["project_pk"])
+
+        return self._issue
+
     def get_queryset(self):
-        return Issue.objects.filter(project_id=self.kwargs.get("project_pk")).order_by(
-            "created_time"
-        )
+        return self.issue.order_by("created_time")
 
     def perform_create(self, serializer):
-        contributor = get_object_or_404(
-            UserModel, pk=serializer.validated_data["assigned_to"].pk
-        )
+        contributor = serializer.validated_data["assigned_to"]
         project = get_object_or_404(Project, id=self.kwargs.get("project_pk"))
 
         serializer.save(
-            author=self.request.user, assigned_to=contributor, project=project
+            author=self.request.user,
+            assigned_to=contributor,
+            project=project,
         )
 
 
