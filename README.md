@@ -3,6 +3,32 @@
 Project 10 OpenClassrooms Path  -  SoftDesk  -- create a secure RESTful API using Django REST
 
 
+## Installation:
+open terminal:
+1. `git clone https://github.com/DoriDoro/SoftDesk_api.git`
+2. `cd SoftDesk_api`
+3. `pipenv install` this command installs all necessary requirements and installs the virtual environment
+4. `pipenv shell` activates the virtual environment
+5. `python manage.py runserver` this command starts the server
+
+ # after the installation and starting the server you can:
+1. use: http://127.0.0.1:8000/api/ in browser to check the API 
+2. BETTER OPTION: go to [Postman](https://www.postman.com/) and make some tests
+
+ # useful ULRs:
+http://127.0.0.1:8000/api/login/
+username: ThePing
+password: HelloThere55
+
+http://127.0.0.1:8000/api/projects/
+
+http://127.0.0.1:8000/api/projects/16/contributors/
+
+http://127.0.0.1:8000/api/projects/11/issues/
+
+http://127.0.0.1:8000/api/projects/11/issues/3/comments/
+
+
 ## Skills:
 - Securing an API to comply with OWASP and RGPD standards
 - Creating a RESTful API with Django REST
