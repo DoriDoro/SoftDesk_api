@@ -4,7 +4,6 @@ class SerializerClassMixin:
     serializer_detail_class = None
 
     def get_serializer_class(self):
-        print(" serializer glass -----", self.action)
         if self.action == "create":
             return self.serializer_create_class
         elif self.action == "list":

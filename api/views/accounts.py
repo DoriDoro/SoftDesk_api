@@ -9,16 +9,12 @@ UserModel = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
-    """
-    Register a User
-    """
-
     serializer_class = UserCreateSerializer
 
 
 class UserViewSet(SerializerClassMixin, ModelViewSet):
     """
-    A ViewSet for viewing and deleting a User
+    A ViewSet for viewing, update (patch) and deleting a User
     """
 
     serializer_class = UserCreateSerializer
