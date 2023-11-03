@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 UserModel = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     """
     User Serializer, used to register a new User
     """
@@ -19,8 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
             "can_be_contacted",
             "can_data_be_shared",
         ]
-        # do not display the password on api
-        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         user = UserModel(
@@ -33,6 +31,24 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    """
+    User Serializer, get all details of a User
+    """
+
+    class Meta:
+        model = UserModel
+        fields = [
+            "id",
+            "username",
+            "password",
+            "age",
+            "can_be_contacted",
+            "can_data_be_shared",
+            "date_joined",
+        ]
 
 
 class ContributorSerializer(serializers.ModelSerializer):

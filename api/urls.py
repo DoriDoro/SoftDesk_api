@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from api.views.accounts import (
     RegisterView,
+    UserViewSet,
 )
 from api.views.project import (
     ProjectViewSet,
@@ -36,4 +37,12 @@ urlpatterns = [
     path("", include(comments_router.urls)),
     path("register/", RegisterView.as_view(), name="sign_up"),
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("users/", UserViewSet.as_view({"get": "list"}), name="user-list"),
+    path(
+        "users/<int:pk>/",
+        UserViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy", "patch": "update"}
+        ),
+        name="user-detail",
+    ),
 ]
