@@ -31,9 +31,10 @@ class ProjectViewSet(SerializerClassMixin, ModelViewSet):
     A simple ViewSet for creating, viewing and editing projects
     """
 
-    serializer_class = ProjectListSerializer
+    serializer_class = ProjectCreateSerializer
     serializer_create_class = ProjectCreateSerializer
     serializer_detail_class = ProjectDetailSerializer
+    serializer_list_class = ProjectListSerializer
     permission_classes = [IsAuthor, IsAuthenticated]
 
     _project = None
@@ -109,6 +110,7 @@ class IssueViewSet(SerializerClassMixin, ModelViewSet):
     serializer_class = IssueListSerializer
     serializer_create_class = IssueCreateSerializer
     serializer_detail_class = IssueDetailSerializer
+    serializer_list_class = IssueListSerializer
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     _issue = None
@@ -141,9 +143,10 @@ class CommentViewSet(SerializerClassMixin, ModelViewSet):
     - Creates the issue_url
     """
 
-    serializer_class = CommentListSerializer
+    serializer_class = CommentCreateSerializer
     serializer_create_class = CommentCreateSerializer
     serializer_detail_class = CommentDetailSerializer
+    serializer_list_class = CommentListSerializer
     permission_classes = [IsProjectAuthorOrContributor, IsAuthenticated]
 
     _comment = None
