@@ -22,11 +22,13 @@ password: HelloThere55
 
 http://127.0.0.1:8000/api/projects/
 
-http://127.0.0.1:8000/api/projects/16/contributors/
+http://127.0.0.1:8000/api/projects/1/contributors/
 
-http://127.0.0.1:8000/api/projects/11/issues/
+http://127.0.0.1:8000/api/projects/1/issues/
 
-http://127.0.0.1:8000/api/projects/11/issues/3/comments/
+http://127.0.0.1:8000/api/projects/1/issues/1/comments/
+
+http://127.0.0.1:8000/api/users/
 
 
 ## Skills:
@@ -39,25 +41,35 @@ all images are Postman visualisations.
 
 1. GET all projects of the logged-in user:
 ![projects](/README_images/GET_projects.png)
+<br>
 
 2. GET detailed version of one project of logged-in user:
 ![single_project](/README_images/GET_single_project.png)
+<br>
 
 3. GET all issues of the logged-in user:
 ![issues](/README_images/GET_issues.png)
+<br>
 
 4. GET detailed issue of one issue:
 ![single_issue](/README_images/GET_single_issue.png)
+<br>
 
 5. GET all comments of logged-in user:
 ![comments](/README_images/GET_comments.png)
+<br>
 
 6. GET single comment of logged-in user:
 ![single_comment](/README_images/GET_single_comment.png)
+<br>
 
 7. GET all contributors of the project:
 ![contributors](/README_images/GET_contributors.png)
-
+<br>
 
 ## Articles:
 - [How to first migrate custom User model within models directory](https://dev.to/doridoro/how-to-first-migrate-custom-user-model-within-models-directory-1bdl)
+- [DRF create @property in view](https://dev.to/doridoro/drf-create-property-decorator-in-view-and-use-property-in-serializer-okm)
+- [DRF create validation in serializer](https://dev.to/doridoro/drf-create-validation-in-serializer-421i)
+- [Error: __str__ returned non-string (type User)](https://dev.to/doridoro/error-str-returned-non-string-type-user-344n)
+- [Problem with serializer](https://dev.to/doridoro/what-problems-can-happen-with-different-serializer-in-drf-5e7m)

@@ -33,11 +33,17 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
-    """
-    User Serializer, get all details of a User
-    """
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = [
+            "id",
+            "username",
+            "password",
+        ]
 
+
+class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = [
