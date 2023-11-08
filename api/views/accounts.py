@@ -17,10 +17,6 @@ class RegisterView(generics.CreateAPIView):
 
 
 class UserViewSet(SerializerClassMixin, ModelViewSet):
-    """
-    A ViewSet for viewing, update (patch) and deleting a User
-    """
-
     serializer_class = UserListSerializer
     serializer_create_class = UserCreateSerializer
     serializer_detail_class = UserDetailSerializer

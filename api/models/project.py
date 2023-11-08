@@ -5,11 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Project(models.Model):
-    """
-    User creates project as author and become contributor,
-    can assign other contributor(s) to project
-    """
-
     # project_types for project
     BACKEND = "B"
     FRONTEND = "F"

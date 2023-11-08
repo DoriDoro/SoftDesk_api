@@ -29,10 +29,6 @@ class ProjectCreateSerializer(serializers.ModelSerializer):
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
-    """
-    display/lists selected information about the Project
-    """
-
     class Meta:
         model = Project
         fields = [
@@ -44,10 +40,6 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
-    """
-    display all information/details about the Project
-    """
-
     class Meta:
         model = Project
         fields = [
@@ -96,10 +88,6 @@ class IssueCreateSerializer(serializers.ModelSerializer):
 
 
 class IssueListSerializer(serializers.ModelSerializer):
-    """
-    displays/lists selected fields of the Issue model
-    """
-
     class Meta:
         model = Issue
         fields = [
@@ -116,10 +104,6 @@ class IssueListSerializer(serializers.ModelSerializer):
 
 
 class IssueDetailSerializer(serializers.ModelSerializer):
-    """
-    displays all fields of the Issue model
-    """
-
     class Meta:
         model = Issue
         fields = [
@@ -158,10 +142,6 @@ class CommentCreateSerializer(serializers.ModelSerializer):
 
 
 class CommentListSerializer(serializers.ModelSerializer):
-    """
-    displays selected fields of the Comment model
-    """
-
     class Meta:
         model = Comment
         fields = [
@@ -173,10 +153,6 @@ class CommentListSerializer(serializers.ModelSerializer):
 
 
 class CommentDetailSerializer(serializers.ModelSerializer):
-    """
-    displays the fields of the Comment model
-    """
-
     class Meta:
         model = Comment
         fields = [

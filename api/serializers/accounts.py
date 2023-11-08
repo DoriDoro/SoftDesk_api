@@ -90,11 +90,6 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class ContributorDetailSerializer(serializers.ModelSerializer):
-    """
-    User/Contributor Serializer
-    - all details about the User
-    """
-
     class Meta:
         model = UserModel
         fields = [
