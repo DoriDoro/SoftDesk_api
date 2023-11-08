@@ -22,5 +22,7 @@ class UserViewSet(SerializerClassMixin, ModelViewSet):
     serializer_detail_class = UserDetailSerializer
     serializer_list_class = UserListSerializer
 
+    # TODO permission that just the user can access his own data
+
     def get_queryset(self):
         return UserModel.objects.all().order_by("date_joined")

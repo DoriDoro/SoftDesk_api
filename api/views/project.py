@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -160,8 +161,6 @@ class CommentViewSet(SerializerClassMixin, ModelViewSet):
         project_pk = self.kwargs["project_pk"]
         issue_pk = self.kwargs["issue_pk"]
         issue = get_object_or_404(Issue, id=issue_pk)
-        issue_url = (
-            f"http://127.0.0.1:8000/api/projects/{project_pk}/issues/{issue_pk}/"
-        )
+        issue_url = f"{settings.BASE_URL}/api/projects/{project_pk}/issues/{issue_pk}/"
 
         serializer.save(author=self.request.user, issue=issue, issue_url=issue_url)

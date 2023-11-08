@@ -86,3 +86,4 @@ all images are Postman visualisations.
 - [DRF create validation in serializer](https://dev.to/doridoro/drf-create-validation-in-serializer-421i)
 - [Error: \_\_str\_\_ returned non-string (type User)](https://dev.to/doridoro/error-str-returned-non-string-type-user-344n)
 - [Problem with serializer](https://dev.to/doridoro/what-problems-can-happen-with-different-serializer-in-drf-5e7m)
+- [several ways to create a simple url](https://dev.to/doridoro/several-ways-to-create-a-simple-url-2fhh)
