@@ -26,7 +26,6 @@ UserModel = get_user_model()
 
 
 class ProjectViewSet(SerializerClassMixin, ModelViewSet):
-
     serializer_class = ProjectCreateSerializer
     serializer_create_class = ProjectCreateSerializer
     serializer_detail_class = ProjectDetailSerializer

@@ -2,6 +2,19 @@
 ## Description:
 Project 10 OpenClassrooms Path  -  SoftDesk  -- create a secure RESTful API using Django REST
 
+For the SoftDesk project we created an RESTful API from scratch. The User model got additional 
+attributes, for GDPR regulations. The user should have the possibility to view, edit and delete 
+the information. 
+
+A user can create different types of projects, add other users as contributor(s) and add issues 
+to these projects. The issue has different tags, states and priorities. An issue can be assigned 
+to a contributor or to the author itself. Out of the issue a user/contributor can create comments.
+
+To garantie just the author (creating user, no contributor) of a project is able to edit or 
+delete a project, issue and comment, we implemented permissions. For the “Green Code” implementation, 
+I have created several serializers for different purposes, added pagination and reduced database 
+queries with the creation of view properties. 
+
 
 ## Installation:
 open terminal:
