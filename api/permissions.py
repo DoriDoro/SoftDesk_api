@@ -42,3 +42,20 @@ class IsProjectAuthorOrContributor(BasePermission):
         project_id = view.kwargs.get("project_pk")
         project = Project.objects.get(pk=project_id)
         return project.author == request.user
+
+
+class UserPermission(BasePermission):
+    def has_permission(self, request, view):
+        return True  # Allow all requests to pass the initial permission check
+
+    def has_object_permission(self, request, view, obj):
+        # Deny actions on objects if the user is not authenticated
+        if not request.user.is_authenticated:
+            return False
+
+        if view.action in ["retrieve", "update", "partial_update"]:
+            return (
+                obj == request.user
+            )  # Allow the user to retrieve, update or partial_update their own data
+        else:
+            return False  # For other actions, deny all requests

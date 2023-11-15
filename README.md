@@ -87,3 +87,4 @@ all images are Postman visualisations.
 - [Error: \_\_str\_\_ returned non-string (type User)](https://dev.to/doridoro/error-str-returned-non-string-type-user-344n)
 - [Problem with serializer](https://dev.to/doridoro/what-problems-can-happen-with-different-serializer-in-drf-5e7m)
 - [several ways to create a simple url](https://dev.to/doridoro/several-ways-to-create-a-simple-url-2fhh)
+- [warning while implementing pagination](https://dev.to/doridoro/django-rest-framework-warning-unorderedobjectlistwarning-1p3p)
